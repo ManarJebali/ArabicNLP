@@ -1,0 +1,32 @@
+# Data settings
+data:
+  train_path: "data/raw/arabic_tweets.csv"
+  test_size: 0.2
+  random_state: 42
+
+# Preprocessing
+preprocessing:
+  vocab_size: 1000
+  min_word_length: 2
+  remove_stopwords: true
+
+# Embeddings
+embeddings:
+  embed_dim: 50
+  window_size: 2
+  num_negatives: 5
+  epochs: 5
+  batch_size: 512
+  learning_rate: 0.01
+
+# Feature extraction
+features:
+  method: "embedding"  # statistical, embedding, tfidf_weighted, combined
+  pooling: "mean"      # mean, max, sum, weighted
+  use_pca: true
+  pca_dims: 30
+
+# Model
+model:
+  type: "logistic_regression"
+  max_iter: 1000
