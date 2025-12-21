@@ -216,27 +216,7 @@ model:
 
 ---
 
-## 🚀 Setup Instructions
 
-### Step 1: Create Project Structure
-```bash
-# Source code directories
-New-Item -Path src\preprocessing -ItemType Directory -Force
-New-Item -Path src\embeddings -ItemType Directory -Force
-New-Item -Path src\features -ItemType Directory -Force
-New-Item -Path src\models -ItemType Directory -Force
-New-Item -Path src\utils -ItemType Directory -Force
-
-# Other directories
-New-Item -Path notebooks -ItemType Directory -Force
-New-Item -Path scripts -ItemType Directory -Force
-New-Item -Path tests -ItemType Directory -Force
-New-Item -Path configs -ItemType Directory -Force
-New-Item -Path results\logs -ItemType Directory -Force
-New-Item -Path results\models -ItemType Directory -Force
-New-Item -Path results\figures -ItemType Directory -Force
-New-Item -Path results\reports -ItemType Directory -Force
-New-Item -Path docs\examples -ItemType Directory -Force
 ```
 
 ### Step 2: Create `requirements.txt`
@@ -535,6 +515,7 @@ pytest tests/
 
 # Launch Jupyter
 jupyter notebook notebooks/
+
 
 
 
