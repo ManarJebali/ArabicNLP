@@ -434,7 +434,7 @@ This structure keeps your project organized, maintainable, and scalable! 🚀
 
 ---
 
-## **Step 2: Data Collection**
+✅## **Step 2: Data Collection**
 
 1. Collect data from:
     - Kaggle datasets
@@ -444,7 +444,7 @@ This structure keeps your project organized, maintainable, and scalable! 🚀
 
 ---
 
-## **Step 3: Data Cleaning & Preprocessing**
+ ✅## **Step 3: Data Cleaning & Preprocessing**
 
 1. Text cleaning:
     - Lowercasing, removing HTML, special characters, punctuation (optional)
@@ -456,7 +456,7 @@ This structure keeps your project organized, maintainable, and scalable! 🚀
 
 ---
 
-## **Step 4: Feature Representation**
+✅## **Step 4: Feature Representation**
 
 Convert text to numerical form so models can process it:
 
@@ -535,5 +535,6 @@ pytest tests/
 
 # Launch Jupyter
 jupyter notebook notebooks/
+
 
 
