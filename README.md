@@ -94,6 +94,78 @@ arabic_nlp_project/
         ├── advanced_usage.py
         └── custom_pipeline.py
 ```
+## **Step 1: Define Your Problem**
+
+1. Decide the NLP task:
+    - Text classification (spam, sentiment, topic)
+    - Named Entity Recognition (NER)
+    - Text summarization or generation
+2. Define inputs & outputs clearly.
+3. Choose evaluation metrics:
+    - Accuracy, F1-score, Precision/Recall for classification
+    - BLEU/ROUGE for generation
+
+---
+
+✅## **Step 2: Data Collection**
+
+1. Collect data from:
+    - Kaggle datasets
+    - Public datasets (UCI, Hugging Face Datasets)
+    - Web scraping or APIs (Twitter, Reddit)
+2. Split data into **train / validation / test** sets (70/15/15%).
+
+---
+
+ ✅## **Step 3: Data Cleaning & Preprocessing**
+
+1. Text cleaning:
+    - Lowercasing, removing HTML, special characters, punctuation (optional)
+2. Tokenization:
+    - Word-level, subword-level, or character-level
+    - Example: splitting "I love NLP!" → ["I", "love", "NLP", "!"]
+3. Optional:
+    - Stopword removal, stemming, lemmatization
+
+---
+
+✅## **Step 4: Feature Representation**
+
+Convert text to numerical form so models can process it:
+
+1. **Classical ML features**:
+    - Bag of Words (BoW)
+    - TF-IDF vectors
+2. **Deep Learning features**:
+    - Word embeddings (Word2Vec, GloVe)
+    - Train embeddings from scratch or use pretrained
+3. **Transformer inputs**:
+    - Use a tokenizer like BERT’s to get **input IDs, attention masks**
+
+---
+
+## **Step 5: Start with Classical ML Models (Optional but Recommended)**
+
+1. Train a simple model to get a baseline:
+    - Naive Bayes
+    - Logistic Regression
+    - SVM
+2. Evaluate and record performance.
+3. Helps understand your data before deep learning.
+
+---
+
+## **Step 6: Build Small Neural Networks**
+
+1. Start simple:
+    - Feedforward neural network with BoW/TF-IDF features
+2. Progress to **sequence models**:
+    - RNN, LSTM, GRU → handle word order and sequences
+    - CNN → captures local patterns (n-grams)
+3. Train and evaluate.
+4. Optional: visualize embeddings and predictions for insights.
+
+
 
 ---
 
@@ -401,78 +473,6 @@ This structure keeps your project organized, maintainable, and scalable! 🚀
 
 
 
-## **Step 1: Define Your Problem**
-
-1. Decide the NLP task:
-    - Text classification (spam, sentiment, topic)
-    - Named Entity Recognition (NER)
-    - Text summarization or generation
-2. Define inputs & outputs clearly.
-3. Choose evaluation metrics:
-    - Accuracy, F1-score, Precision/Recall for classification
-    - BLEU/ROUGE for generation
-
----
-
-✅## **Step 2: Data Collection**
-
-1. Collect data from:
-    - Kaggle datasets
-    - Public datasets (UCI, Hugging Face Datasets)
-    - Web scraping or APIs (Twitter, Reddit)
-2. Split data into **train / validation / test** sets (70/15/15%).
-
----
-
- ✅## **Step 3: Data Cleaning & Preprocessing**
-
-1. Text cleaning:
-    - Lowercasing, removing HTML, special characters, punctuation (optional)
-2. Tokenization:
-    - Word-level, subword-level, or character-level
-    - Example: splitting "I love NLP!" → ["I", "love", "NLP", "!"]
-3. Optional:
-    - Stopword removal, stemming, lemmatization
-
----
-
-✅## **Step 4: Feature Representation**
-
-Convert text to numerical form so models can process it:
-
-1. **Classical ML features**:
-    - Bag of Words (BoW)
-    - TF-IDF vectors
-2. **Deep Learning features**:
-    - Word embeddings (Word2Vec, GloVe)
-    - Train embeddings from scratch or use pretrained
-3. **Transformer inputs**:
-    - Use a tokenizer like BERT’s to get **input IDs, attention masks**
-
----
-
-## **Step 5: Start with Classical ML Models (Optional but Recommended)**
-
-1. Train a simple model to get a baseline:
-    - Naive Bayes
-    - Logistic Regression
-    - SVM
-2. Evaluate and record performance.
-3. Helps understand your data before deep learning.
-
----
-
-## **Step 6: Build Small Neural Networks**
-
-1. Start simple:
-    - Feedforward neural network with BoW/TF-IDF features
-2. Progress to **sequence models**:
-    - RNN, LSTM, GRU → handle word order and sequences
-    - CNN → captures local patterns (n-grams)
-3. Train and evaluate.
-4. Optional: visualize embeddings and predictions for insights.
-
-
 
 
 ARABIC NLP PIPELINE
@@ -515,6 +515,7 @@ pytest tests/
 
 # Launch Jupyter
 jupyter notebook notebooks/
+
 
 
 
