@@ -1,0 +1,15 @@
+# Embedding training configuration
+
+input_data: "data/processed/train.csv"
+embedding_method: "word2vec"
+tokenizer: "basic"  # or "custom"
+embedding_dim: 50
+window_size: 2
+negative_samples: 5
+epochs: 5
+batch_size: 512
+learning_rate: 0.01
+
+# Output
+embedding_output: "data/embeddings/word2vec_50d.npy"
+metadata_output: "data/embeddings/embedding_metadata.json"
