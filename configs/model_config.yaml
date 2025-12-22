@@ -1,5 +1,12 @@
-# Model training configuration
-model_type: "Simple_FeedForwardNN"
+
+
+# Model selection (THIS is the key)
+model_type: "LSTM"
+# Possible values:
+# - Simple_FeedForwardNN
+# - LSTM
+# - GRU
+# - CNN
 
 # Save model
 model_save_path: "results/models/best_model.pkl"
@@ -21,3 +28,7 @@ model:
   lr: 0.001
   num_epochs: 10
   batch_size: 64
+ # Sequence models (Embeddings)
+  embedding_dim: 50
+  num_layers: 1
+  bidirectional: true

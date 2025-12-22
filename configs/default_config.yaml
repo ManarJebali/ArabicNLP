@@ -21,6 +21,7 @@ embeddings:
   epochs: 5
   batch_size: 512
   learning_rate: 0.01
+  embedding_output: "data/embeddings/word2vec_50d.npy"   # <- make sure this exists
 
 # Feature extraction
 features:
