@@ -53,7 +53,6 @@ def preprocess_and_save(config):
     vocab_size = config["preprocessing"]["vocab_size"]
     seq_len = 50  # fixed sequence length for padding
 
-    # 1️⃣ Load raw data (CSV or Excel)
     if raw_file.endswith(".csv"):
         df = pd.read_csv(raw_file)
     elif raw_file.endswith((".xls", ".xlsx")):
@@ -61,7 +60,9 @@ def preprocess_and_save(config):
     else:
         raise ValueError("File must be CSV or Excel")
 
-    print(f"✓ Loaded {len(df)} raw samples")
+    # TAKE ONLY 5000 LINES
+    df = df.iloc[:5000].copy()
+    print(f"✓ Loaded {len(df)} raw samples (limited to 5000)")
 
     # Ensure required columns
     if 'tweet' not in df.columns or 'label' not in df.columns:
