@@ -41,7 +41,7 @@ def load_model_config(model_type: str):
 # Load best model
 # ----------------------------
 def load_best_model(model_type: str):
-    model_dir = Path("results/models")
+    model_dir = Path("scripts/results/models")
     best_model_path = model_dir / f"{model_type}_best_model.pkl"
     if not best_model_path.exists():
         raise FileNotFoundError(f"Best model not found: {best_model_path}")
