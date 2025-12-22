@@ -208,6 +208,45 @@ def main():
         json.dump(history, f, indent=4)
     print(f"✅ Training report saved to {report_path}")
 
+   # Ensure output directory exists
+    model_dir = Path("results/models")
+    model_dir.mkdir(parents=True, exist_ok=True)
 
+    # Save path for best model
+    best_model_path = model_dir / f"{config['model_type']}_best_model.pkl"
+   # Ensure output directory exists
+    model_dir = Path("results/models")
+    model_dir.mkdir(parents=True, exist_ok=True)
+
+    # Save path for best model
+    best_model_path = model_dir / f"{config['model_type']}_best_model.pkl"
+
+    # Train
+    history = trainer.train(
+        train_loader=train_loader,
+        val_loader=test_loader,
+        num_epochs=config["model"]["num_epochs"],
+        save_path=best_model_path
+    )
+# Save model metadata
+    metadata = {
+        "model_type": config["model_type"],
+        "input_dim": embedding_matrix.shape[0],
+        "embedding_dim": embedding_matrix.shape[1],
+        "hidden_dim": config["model"]["hidden_dim"],
+        "num_layers": config["model"].get("num_layers", 1),
+        "bidirectional": config["model"].get("bidirectional", False),
+        "num_classes": config["model"]["num_classes"],
+        "batch_size": config["model"]["batch_size"],
+        "num_epochs": config["model"]["num_epochs"],
+        "learning_rate": config["model"]["lr"],
+        "best_model_file": str(best_model_path),
+        "training_report_file": str(report_path)
+    }
+
+    metadata_path = model_dir / f"{config['model_type']}_metadata.json"
+    with open(metadata_path, "w", encoding="utf-8") as f:
+        json.dump(metadata, f, indent=4)
+    print(f"✅ Model metadata saved to {metadata_path}")
 if __name__ == "__main__":
     main()

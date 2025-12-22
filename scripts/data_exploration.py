@@ -1,0 +1,1 @@
+# generer un json file under data contenant les resultatas de lexploration et charger les graphes de l'exploration

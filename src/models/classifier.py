@@ -4,6 +4,8 @@ Classification models
 
 import numpy as np
 from sklearn.linear_model import LogisticRegression
+from sklearn.svm import SVC
+from sklearn.naive_bayes import MultinomialNB
 from sklearn.metrics import accuracy_score, classification_report
 
 
@@ -13,7 +15,7 @@ class ArabicTextClassifier:
     def __init__(self, model_type='logistic', **kwargs):
         """
         Args:
-            model_type: Type of classifier
+            model_type: Type of classifier ('logistic', 'svm', 'naive_bayes')
             **kwargs: Model-specific parameters
         """
         self.model_type = model_type
@@ -22,6 +24,17 @@ class ArabicTextClassifier:
             self.model = LogisticRegression(
                 max_iter=kwargs.get('max_iter', 1000),
                 random_state=kwargs.get('random_state', 42)
+            )
+        elif model_type == 'svm':
+            self.model = SVC(
+                C=kwargs.get('C', 1.0),
+                kernel=kwargs.get('kernel', 'linear'),
+                probability=kwargs.get('probability', True),
+                random_state=kwargs.get('random_state', 42)
+            )
+        elif model_type == 'naive_bayes':
+            self.model = MultinomialNB(
+                alpha=kwargs.get('alpha', 1.0)
             )
         else:
             raise ValueError(f"Unknown model type: {model_type}")
