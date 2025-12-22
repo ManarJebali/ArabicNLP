@@ -1,0 +1,14 @@
+{
+    "model_type": "LSTM",
+    "input_dim": 1001,
+    "embedding_dim": 50,
+    "hidden_dim": 128,
+    "num_layers": 1,
+    "bidirectional": true,
+    "num_classes": 6,
+    "batch_size": 64,
+    "num_epochs": 5,
+    "learning_rate": 0.001,
+    "best_model_file": "results\\models\\LSTM_best_model.pkl",
+    "training_report_file": "results\\models\\training_report.json"
+}
