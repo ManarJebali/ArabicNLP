@@ -1,10 +1,3 @@
-"""
-Fixed Flask Backend for Arabic NLP Text Classification
-Place in: C:\Users\PCS\Desktop\ArabicNLP-master\backend\app.py
-Run from: C:\Users\PCS\Desktop\ArabicNLP-master\
-Command: python backend\app.py
-"""
-
 import re
 import json
 import time
