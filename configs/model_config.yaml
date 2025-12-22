@@ -12,3 +12,19 @@ validation_size: 0.15
 # Save model
 model_save_path: "results/models/best_model.pkl"
 checkpoint_dir: "results/models/model_checkpoints/"
+
+model:
+  type: "Simple_FeedForwardNN"       # Model class to use
+  input_dim: 1000                    # Will be automatically set based on TF-IDF features
+  hidden_dim: 128                    # Number of neurons in hidden layer
+  num_classes: 6                     # Number of output classes
+  dropout: 0.3                       # Dropout rate
+  lr: 0.001                           # Learning rate
+  num_epochs: 10                      # Number of epochs
+  batch_size: 64
+
+  data:
+  processed_dir: "data/processed"
+  train_path: "data/processed/train.csv"
+  test_path: "data/processed/test.csv"
+  validation_size: 0.15

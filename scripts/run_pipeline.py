@@ -13,6 +13,8 @@ import numpy as np
 import pickle
 import logging
 
+from src import padding_
+
 # Add src to path
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
@@ -23,7 +25,8 @@ import joblib
 
 from src.utils.data_loader import load_arabic_dataset
 from src.preprocessing.arabic_cleaner import apply_arabic_cleaning
-from src.preprocessing.tokenizer import tokenize_arabic, padding_
+from src.preprocessing.tokenizer import tokenize_arabic
+
 from src.embeddings.sgns_trainer import train_sgns_for_tokenize_outputs
 from src.features.pipeline import ArabicFeaturePipeline
 
@@ -142,11 +145,7 @@ def main(config_path):
     # ========================================================================
     logger.info("\n6️⃣ Saving processed data...")
 
-    # Save padded sequences
-    np.save(os.path.join(processed_dir, 'x_train_pad.npy'), x_train_pad)
-    np.save(os.path.join(processed_dir, 'y_train.npy'), encoded_train)
-    np.save(os.path.join(processed_dir, 'x_test_pad.npy'), x_test_pad)
-    np.save(os.path.join(processed_dir, 'y_test.npy'), encoded_test)
+
 
     # Save token sequences (un-padded)
     with open(os.path.join(processed_dir, 'final_list_train.pkl'), 'wb') as f:

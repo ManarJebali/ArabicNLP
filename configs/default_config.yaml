@@ -1,9 +1,12 @@
 # Data settings
 data:
-  train_path: "data/raw/arabic_tweets.csv"
+  train_path: "C:/Users/Dell/PycharmProjects/ArabicNLP/data/raw/arabic_Depression_15.000_Tweets_Annotated.xlsx"
+
   test_size: 0.2
   random_state: 42
-
+  processed_dir: "C:/Users/Dell/PycharmProjects/ArabicNLP/data/processed"
+  token_file : "tokens.json"
+  vocab_file: "vocab.json"
 # Preprocessing
 preprocessing:
   vocab_size: 1000
@@ -30,3 +33,4 @@ features:
 model:
   type: "logistic_regression"
   max_iter: 1000
+

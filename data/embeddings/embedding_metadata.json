@@ -1,0 +1,15 @@
+{
+    "embedding_method": "word2vec",
+    "tokenizer": "basic",
+    "embedding_dim": 50,
+    "window_size": 2,
+    "negative_samples": 5,
+    "epochs": 5,
+    "batch_size": 512,
+    "learning_rate": 0.01,
+    "vocab_size": 1000,
+    "embedding_shape": [
+        1001,
+        50
+    ]
+}

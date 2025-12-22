@@ -1,5 +1,5 @@
 """
-Script to extract features from tokens using the feature pipeline.
+Script to extract features from tokens.json using the feature pipeline.
 Usage: python scripts/extract_features.py --data data/processed/train.csv --output features.npy --config configs/default_config.yaml
 """
 
@@ -17,10 +17,10 @@ def main(data_path, output_path, config_path):
         config = yaml.safe_load(f)
 
     df = pd.read_csv(data_path)
-    df['tokens'] = df['text'].apply(tokenize_arabic)
+    df['tokens.json'] = df['text'].apply(tokenize_arabic)
 
     pipeline = ArabicFeaturePipeline(config=config['features'])
-    features = pipeline.transform(df['tokens'])
+    features = pipeline.transform(df['tokens.json'])
     np.save(output_path, features)
     print("Features extracted and saved to", output_path)
 

@@ -9,7 +9,6 @@ import torch.nn as nn
 from torch.utils.data import Dataset, DataLoader
 import re
 
-from notebooks.FinalArabicNLP import x_train, y_train, x_test, y_test
 from src.preprocessing.tokenizer import tokenize_arabic
 
 
@@ -40,7 +39,7 @@ def _coerce_and_validate_id_seqs(
 ) -> List[List[int]]:
     """
     Ensure we have List[List[int]] with ids in [1..vocab_size].
-    - If a sequence is a list/array/tuple: keep only int-like tokens in range.
+    - If a sequence is a list/array/tuple: keep only int-like tokens.json in range.
     - If a sequence is a single int-like token: wrap as a length-1 list.
     - If a sequence is a string of digits (e.g., '1 2 3' or '1,2,3'): parse digits.
     - Otherwise: raise with a helpful message.
@@ -277,18 +276,3 @@ def train_sgns_for_tokenize_outputs(
 
     emb = extract_embedding_matrix(model)  # [V+1, D], row 0 unused
     return emb, vocab_size
-
-final_list_train, encoded_train, final_list_test, encoded_test, vocab = tokenize_arabic(
-    x_train, y_train, x_test, y_test
-)
-emb, V = train_sgns_for_tokenize_outputs(
-        final_list_train=final_list_train,
-        onehot_dict=vocab,
-        embed_dim=50,
-        window_size=2,
-        num_negatives=5,
-        batch_size=8,
-        epochs=5,
-        lr=0.01,
-    )
-print(emb.shape)

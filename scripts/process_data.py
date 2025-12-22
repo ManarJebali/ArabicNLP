@@ -10,11 +10,15 @@ Preprocessing pipeline for Arabic NLP project
 
 import os
 import json
+
+import torch
 import yaml
 import numpy as np
 import pandas as pd
 from sklearn.model_selection import train_test_split
 import pickle
+
+from torch.utils.data import DataLoader, TensorDataset
 
 from src.preprocessing.arabic_cleaner import apply_arabic_cleaning
 from src.preprocessing.tokenizer import tokenize_arabic
@@ -24,14 +28,12 @@ def load_config(config_path="configs/default_config.yaml"):
     """
     Load YAML configuration
     """
-    # Resolve path relative to project root
     project_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
     config_path = os.path.join(project_root, "configs", "default_config.yaml")
 
     with open(config_path, "r", encoding="utf-8") as f:
         config = yaml.safe_load(f)
 
-    # Convert train_path to absolute path
     train_path = config["data"]["train_path"]
     if not os.path.isabs(train_path):
         config["data"]["train_path"] = os.path.join(project_root, train_path)
@@ -70,51 +72,63 @@ def preprocess_and_save(config):
     print("✓ Applied Arabic cleaning")
 
     # 3️⃣ Split into train/test
-    x_train, x_test, y_train, y_test = train_test_split(
-        df_clean['text'].values,
-        df_clean['label'].values,
+    train_df, test_df = train_test_split(
+        df_clean,
         test_size=test_size,
-        random_state=random_state
+        random_state=random_state,
+        shuffle=True,
+        stratify=df_clean['label']
     )
-    print(f"✓ Split into {len(x_train)} train and {len(x_test)} test samples")
+    print(f"✓ Split into {len(train_df)} train and {len(test_df)} test samples")
 
-    # 4️⃣ Tokenize
+    # Save raw cleaned train/test CSVs
+    train_csv_path = os.path.join(processed_dir, "train.csv")
+    test_csv_path  = os.path.join(processed_dir, "test.csv")
+    # Clear files first
+    open(train_csv_path, 'w', encoding='utf-8').close()
+    open(test_csv_path, 'w', encoding='utf-8').close()
+
+    train_df.to_csv(train_csv_path, index=False, encoding="utf-8")
+    test_df.to_csv(test_csv_path, index=False, encoding="utf-8")
+    print(f"✓ Saved raw train CSV: {train_csv_path}")
+    print(f"✓ Saved raw test CSV: {test_csv_path}")
+
+    # 4️⃣ Tokenize sequences
     final_list_train, encoded_train, final_list_test, encoded_test, vocab = tokenize_arabic(
-        x_train, y_train, x_test, y_test, vocab_size=vocab_size
+        train_df['text'].values, train_df['label'].values,
+        test_df['text'].values, test_df['label'].values,
+        vocab_size=vocab_size
     )
     print(f"✓ Tokenized sequences. Vocabulary size: {len(vocab)}")
-
-    # Optional: show most common words
     print("Most common words:", list(vocab.keys())[:10])
 
     # 5️⃣ Pad sequences
     x_train_pad = padding_(final_list_train, seq_len=seq_len)
     x_test_pad  = padding_(final_list_test, seq_len=seq_len)
 
-    # 6️⃣ Save processed data
-
-    # Save padded arrays (safe for np.save)
-    np.save(os.path.join(processed_dir, "x_train_pad.npy"), x_train_pad)
-    np.save(os.path.join(processed_dir, "x_test_pad.npy"), x_test_pad)
-    np.save(os.path.join(processed_dir, "encoded_train.npy"), encoded_train, allow_pickle=True)
-    np.save(os.path.join(processed_dir, "encoded_test.npy"), encoded_test, allow_pickle=True)
-
-    # Save raw token lists with pickle if needed
-    with open(os.path.join(processed_dir, "final_list_train.pkl"), "wb") as f:
-        pickle.dump(final_list_train, f)
-    with open(os.path.join(processed_dir, "final_list_test.pkl"), "wb") as f:
-        pickle.dump(final_list_test, f)
-
     # Save vocabulary
     with open(os.path.join(processed_dir, "vocab.json"), "w", encoding="utf-8") as f:
         json.dump(vocab, f, ensure_ascii=False, indent=4)
 
-    print(f"✓ Saved processed data to {processed_dir}")
-    return x_train_pad, encoded_train, x_test_pad, encoded_test, vocab
+
+    print(f"✓ Saved processed tokenized data to {processed_dir}")
+
+    # 7️⃣ Save separate .npy files for compatibility with train_embeddings.py
+
+    # Convert lists of sequences to object arrays before saving
+
+    # Clear existing files first
+    open(os.path.join(processed_dir, "final_list_train.npy"), 'wb').close()
+    open(os.path.join(processed_dir, "encoded_train.npy"), 'wb').close()
+    open(os.path.join(processed_dir, "final_list_test.npy"), 'wb').close()
+    open(os.path.join(processed_dir, "encoded_test.npy"), 'wb').close()
+
+    np.save(os.path.join(processed_dir, "final_list_train.npy"), np.array(final_list_train, dtype=object))
+    np.save(os.path.join(processed_dir, "encoded_train.npy"), np.array(encoded_train, dtype=object))
+    np.save(os.path.join(processed_dir, "final_list_test.npy"), np.array(final_list_test, dtype=object))
+    np.save(os.path.join(processed_dir, "encoded_test.npy"), np.array(encoded_test, dtype=object))
+    print("✓ Saved separate .npy files for training embeddings")
 
 if __name__ == "__main__":
-    # Load configuration
     config = load_config()
-
-    # Run preprocessing
     preprocess_and_save(config)

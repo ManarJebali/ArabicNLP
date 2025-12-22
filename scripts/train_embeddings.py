@@ -1,77 +1,138 @@
 """
 Train Word2Vec embeddings from processed data
-Usage: python scripts/train_embeddings.py --data data/processed/final_list_train.pkl --vocab data/processed/vocab.pkl --output data/embeddings/
+Usage:
+    python scripts/train_embeddings.py
 """
 
-import argparse
-import sys
-from pathlib import Path
+import json
+import yaml
 import numpy as np
-import pickle
-
-sys.path.insert(0, str(Path(__file__).parent.parent))
+from pathlib import Path
 
 from src.embeddings.sgns_trainer import train_sgns_for_tokenize_outputs
 
 
+# =========================================================
+# Config loader
+# =========================================================
+def load_yaml_config(config_path: Path) -> dict:
+    if not config_path.exists():
+        raise FileNotFoundError(f"Config file not found: {config_path}")
+
+    with open(config_path, "r", encoding="utf-8") as f:
+        return yaml.safe_load(f)
+
+
+# =========================================================
+# Data loader
+# =========================================================
+def load_tokenized_data():
+    """
+    Load tokenized .npy files and vocab.json
+    """
+    project_root = Path(__file__).resolve().parents[1]
+    data_dir = project_root / "data" / "processed"
+
+    files = {
+        "x_train": data_dir / "final_list_train.npy",
+        "y_train": data_dir / "encoded_train.npy",
+        "x_test":  data_dir / "final_list_test.npy",
+        "y_test":  data_dir / "encoded_test.npy",
+        "vocab":   data_dir / "vocab.json",
+    }
+
+    for path in files.values():
+        if not path.exists():
+            raise FileNotFoundError(f"Missing file: {path}")
+
+    x_train = np.load(files["x_train"], allow_pickle=True)
+    y_train = np.load(files["y_train"], allow_pickle=True)
+    x_test  = np.load(files["x_test"], allow_pickle=True)
+    y_test  = np.load(files["y_test"], allow_pickle=True)
+
+    with open(files["vocab"], "r", encoding="utf-8") as f:
+        vocab = json.load(f)
+
+    return x_train, y_train, x_test, y_test, vocab
+
+
+# =========================================================
+# Main
+# =========================================================
 def main():
-    parser = argparse.ArgumentParser(description='Train Word2Vec Embeddings')
-    parser.add_argument('--data', type=str, required=True,
-                        help='Path to tokenized sequences (pickle file)')
-    parser.add_argument('--vocab', type=str, required=True,
-                        help='Path to vocabulary (pickle file)')
-    parser.add_argument('--output', type=str, default='data/embeddings/',
-                        help='Output directory for embeddings')
-    parser.add_argument('--embed-dim', type=int, default=50)
-    parser.add_argument('--epochs', type=int, default=5)
-    parser.add_argument('--window-size', type=int, default=2)
-    parser.add_argument('--num-negatives', type=int, default=5)
-    parser.add_argument('--batch-size', type=int, default=512)
-    parser.add_argument('--lr', type=float, default=0.01)
-    args = parser.parse_args()
+    project_root = Path(__file__).resolve().parents[1]
 
-    print("=" * 70)
-    print("TRAINING WORD2VEC EMBEDDINGS")
-    print("=" * 70)
+    # -----------------------------------------------------
+    # Load embedding config
+    # -----------------------------------------------------
+    config_path = project_root / "configs" / "embedding_config.yaml"
+    config = load_yaml_config(config_path)
 
-    # Load data
-    print("\n1️⃣ Loading data...")
-    with open(args.data, 'rb') as f:
-        final_list_train = pickle.load(f)
-    print(f"   ✓ Loaded {len(final_list_train)} sequences")
+    print("✓ Loaded embedding configuration")
 
-    with open(args.vocab, 'rb') as f:
-        vocab = pickle.load(f)
-    print(f"   ✓ Loaded vocabulary of size {len(vocab)}")
+    # -----------------------------------------------------
+    # Load tokenized data
+    # -----------------------------------------------------
+    final_list_train, _, _, _, vocab = load_tokenized_data()
 
+    print("✓ Loaded tokenized data")
+    print(f"✓ Vocabulary size: {len(vocab)}")
+
+    if not vocab:
+        raise ValueError("Vocabulary is empty. Run preprocessing first.")
+
+    # -----------------------------------------------------
     # Train embeddings
-    print("\n2️⃣ Training embeddings...")
-    embedding_matrix, V = train_sgns_for_tokenize_outputs(
+    # -----------------------------------------------------
+    embedding_matrix, vocab_size = train_sgns_for_tokenize_outputs(
         final_list_train=final_list_train,
         onehot_dict=vocab,
-        embed_dim=args.embed_dim,
-        window_size=args.window_size,
-        num_negatives=args.num_negatives,
-        batch_size=args.batch_size,
-        epochs=args.epochs,
-        lr=args.lr
+        embed_dim=config["embedding_dim"],
+        window_size=config["window_size"],
+        num_negatives=config["negative_samples"],
+        batch_size=config["batch_size"],
+        epochs=config["epochs"],
+        lr=config["learning_rate"],
     )
 
-    print(f"\n   ✓ Embeddings shape: {embedding_matrix.shape}")
+    print(f"✓ Embedding matrix shape: {embedding_matrix.shape}")
 
-    # Save
-    print("\n3️⃣ Saving embeddings...")
-    output_dir = Path(args.output)
-    output_dir.mkdir(parents=True, exist_ok=True)
+    # -----------------------------------------------------
+    # Save outputs USING CONFIG PATHS
+    # -----------------------------------------------------
+    embedding_path = project_root / config["embedding_output"]
+    metadata_path  = project_root / config["metadata_output"]
 
-    output_path = output_dir / f'embeddings_{args.embed_dim}d.npy'
-    np.save(output_path, embedding_matrix)
-    print(f"   ✓ Saved to {output_path}")
+    embedding_path.parent.mkdir(parents=True, exist_ok=True)
+    metadata_path.parent.mkdir(parents=True, exist_ok=True)
 
-    print("\n" + "=" * 70)
-    print("✅ EMBEDDING TRAINING COMPLETE!")
-    print("=" * 70)
+    # Save embedding matrix
+    np.save(embedding_path, embedding_matrix)
+
+    # Save metadata
+    metadata = {
+        "embedding_method": config["embedding_method"],
+        "tokenizer": config["tokenizer"],
+        "embedding_dim": config["embedding_dim"],
+        "window_size": config["window_size"],
+        "negative_samples": config["negative_samples"],
+        "epochs": config["epochs"],
+        "batch_size": config["batch_size"],
+        "learning_rate": config["learning_rate"],
+        "vocab_size": vocab_size,
+        "embedding_shape": list(embedding_matrix.shape),
+    }
+
+    with open(metadata_path, "w", encoding="utf-8") as f:
+        json.dump(metadata, f, indent=4, ensure_ascii=False)
+
+    print(f"✅ Embeddings saved to: {embedding_path}")
+    print(f"✅ Metadata saved to:   {metadata_path}")
+    print("🎉 EMBEDDING TRAINING COMPLETE!")
 
 
+# =========================================================
+# Entry point
+# =========================================================
 if __name__ == "__main__":
     main()
