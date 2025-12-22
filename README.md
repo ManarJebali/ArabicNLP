@@ -144,18 +144,9 @@ Convert text to numerical form so models can process it:
 
 ---
 
-## **Step 5: Start with Classical ML Models (Optional but Recommended)**
-
-1. Train a simple model to get a baseline:
-    - Naive Bayes
-    - Logistic Regression
-    - SVM
-2. Evaluate and record performance.
-3. Helps understand your data before deep learning.
-
 ---
 
-## **Step 6: Build Small Neural Networks**
+✅## **Step 5: Build Small Neural Networks**
 
 1. Start simple:
     - Feedforward neural network with BoW/TF-IDF features
@@ -515,6 +506,7 @@ pytest tests/
 
 # Launch Jupyter
 jupyter notebook notebooks/
+
 
 
 
