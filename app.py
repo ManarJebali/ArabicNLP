@@ -1,79 +1,37 @@
+"""
+Fixed Flask Backend for Arabic NLP Text Classification
+Place in: C:\Users\PCS\Desktop\ArabicNLP-master\backend\app.py
+Run from: C:\Users\PCS\Desktop\ArabicNLP-master\
+Command: python backend\app.py
+"""
+
 import re
+import json
+import time
+import pickle
+from datetime import datetime
+from pathlib import Path
 from flask import Flask, request, jsonify, send_from_directory
 from flask_cors import CORS
-import pickle
-import numpy as np
-import pandas as pd
-from pathlib import Path
-import os
-import sys
-from flask import send_from_directory
-
 
 print("="*80)
 print("ARABIC NLP BACKEND - STARTING")
 print("="*80)
 
-# -------------------------------
-# Define root and subdirectories
-# -------------------------------
-
-# ROOT_DIR: 2 levels up from this script (adjust as needed)
-ROOT_DIR = Path(__file__).resolve().parent  # this is backend/
-
-# Directories
+# Get absolute paths
+SCRIPT_DIR = Path(__file__).resolve().parent  # backend/
+ROOT_DIR = SCRIPT_DIR.parent  # ArabicNLP-master/
 MODELS_DIR = ROOT_DIR / "results" / "models"
-FRONTEND_DIR = ROOT_DIR / "frontend"
-RESULTS_DIR = ROOT_DIR / "results" / "models"
+FRONTEND_DIR = SCRIPT_DIR / "frontend"
 
-# -------------------------------
-# Initialize Flask
-# -------------------------------
-app = Flask(
-    __name__,
-    static_folder=str(FRONTEND_DIR),
-    static_url_path="/"  # Serve files at root URL
-)
-CORS(app)
-
-
-@app.route("/", defaults={"path": ""})
-@app.route("/<path:path>")
-def serve_frontend(path):
-    if path != "" and (FRONTEND_DIR / path).exists():
-        return send_from_directory(FRONTEND_DIR, path)
-    else:
-        return send_from_directory(FRONTEND_DIR, "index.html")
-
-
-# Create directories if missing (optional)
-for d in [MODELS_DIR, FRONTEND_DIR, RESULTS_DIR]:
-    d.mkdir(parents=True, exist_ok=True)
-
-# -------------------------------
-# Load the ML model
-# -------------------------------
-model_path = MODELS_DIR / "best_model.pkl"
-
-if model_path.exists():
-    with open(model_path, "rb") as f:
-        model = pickle.load(f)
-    print(f"Model loaded successfully from {model_path}")
-else:
-    print(f"Warning: Model file not found at {model_path}")
-    model = None
-
-# -------------------------------
-# Print paths for verification
-# -------------------------------
+print(f"\nScript directory: {SCRIPT_DIR}")
 print(f"Root directory: {ROOT_DIR}")
-print(f"Models directory: {MODELS_DIR} (exists: {MODELS_DIR.exists()})")
-print(f"Frontend directory: {FRONTEND_DIR} (exists: {FRONTEND_DIR.exists()})")
-print(f"Results directory: {RESULTS_DIR} (exists: {RESULTS_DIR.exists()})")
+print(f"Models directory: {MODELS_DIR}")
+print(f"Frontend directory: {FRONTEND_DIR}")
+print(f"Models exists: {MODELS_DIR.exists()}")
+print(f"Frontend exists: {FRONTEND_DIR.exists()}")
 
-
-
-# Simple preprocessing
+# Simple Arabic text cleaner
 class SimpleArabicCleaner:
     def __init__(self):
         self.arabic_diacritics = re.compile(r'[\u064B-\u065F\u0670]')
@@ -96,76 +54,73 @@ class SimpleArabicCleaner:
 model = None
 vectorizer = None
 model_metadata = None
+class_names_map = {}
 cleaner = SimpleArabicCleaner()
 
-def load_model():
-    """Load model with proper error handling"""
-    global model, vectorizer, model_metadata
+def load_resources():
+    """Load model, vectorizer, and metadata"""
+    global model, vectorizer, model_metadata, class_names_map
     
     print("\n" + "="*80)
-    print("LOADING MODEL")
+    print("LOADING RESOURCES")
     print("="*80)
     
     try:
-        # Check if results directory exists
-        if not RESULTS_DIR.exists():
-            print(f"\n✗ Results directory not found: {RESULTS_DIR}")
-            print("\nTo fix this:")
-            print("  1. Make sure you're in the correct directory")
-            print("  2. Run: python train_model_final.py")
-            print("  3. Wait for training to complete")
+        # Check models directory
+        if not MODELS_DIR.exists():
+            print(f"\n✗ Models directory not found: {MODELS_DIR}")
+            print("\nPlease train the model first:")
+            print("  python train_model_final.py")
             return False
         
         # Load model
-        model_path = RESULTS_DIR / 'best_model.pkl'
-        print(f"\nLooking for model: {model_path}")
-        
+        model_path = MODELS_DIR / 'best_model.pkl'
         if not model_path.exists():
-            print(f"✗ Model file not found!")
-            print(f"\nPlease train the model first:")
-            print(f"  python train_model_final.py")
+            print(f"\n✗ Model file not found: {model_path}")
             return False
         
-        print("Loading model...")
         with open(model_path, 'rb') as f:
             model = pickle.load(f)
-        print(f"✓ Model loaded successfully")
-        print(f"  Model type: {type(model).__name__}")
+        print(f"✓ Model loaded: {type(model).__name__}")
         
         # Load vectorizer
-        vectorizer_path = RESULTS_DIR / 'vectorizer.pkl'
-        print(f"\nLooking for vectorizer: {vectorizer_path}")
-        
+        vectorizer_path = MODELS_DIR / 'vectorizer.pkl'
         if vectorizer_path.exists():
-            print("Loading vectorizer...")
             with open(vectorizer_path, 'rb') as f:
                 vectorizer = pickle.load(f)
-            print(f"✓ Vectorizer loaded successfully")
-            print(f"  Vectorizer type: {type(vectorizer).__name__}")
+            print(f"✓ Vectorizer loaded: {type(vectorizer).__name__}")
         else:
-            print("⚠ Vectorizer not found (optional)")
+            print("⚠ Vectorizer not found")
         
         # Load metadata
-        metadata_path = RESULTS_DIR / 'model_results.json'
+        metadata_path = MODELS_DIR / 'model_results.json'
         if metadata_path.exists():
             with open(metadata_path, 'r', encoding='utf-8') as f:
                 model_metadata = json.load(f)
-            print(f"✓ Metadata loaded")
+            print("✓ Metadata loaded")
         else:
             model_metadata = {
-                'best_model': 'Trained Model',
-                'best_accuracy': 0.95,
-                'best_f1_score': 0.94
+                'best_model': 'Model',
+                'best_accuracy': 0.0,
+                'best_f1_score': 0.0
             }
-            print("⚠ Using default metadata")
+        
+        # Load class names
+        class_names_path = MODELS_DIR / 'class_names.json'
+        if class_names_path.exists():
+            with open(class_names_path, 'r', encoding='utf-8') as f:
+                class_names_map = json.load(f)
+            print("✓ Class names loaded")
+        else:
+            class_names_map = {'0': 'فئة 0', '1': 'فئة 1', '2': 'فئة 2'}
         
         print("\n" + "="*80)
-        print("✓ ALL RESOURCES LOADED SUCCESSFULLY")
+        print("✅ ALL RESOURCES LOADED SUCCESSFULLY")
         print("="*80)
         return True
         
     except Exception as e:
-        print(f"\n✗ ERROR loading model: {e}")
+        print(f"\n✗ ERROR: {e}")
         import traceback
         traceback.print_exc()
         return False
@@ -174,8 +129,8 @@ def load_model():
 app = Flask(__name__, static_folder=str(FRONTEND_DIR), static_url_path='')
 CORS(app)
 
-# Load model on startup
-MODEL_LOADED = load_model()
+# Load resources
+MODEL_LOADED = load_resources()
 
 @app.route('/')
 def index():
@@ -183,11 +138,7 @@ def index():
     try:
         return send_from_directory(str(FRONTEND_DIR), 'index.html')
     except Exception as e:
-        return jsonify({
-            'error': 'Frontend not found',
-            'message': str(e),
-            'frontend_dir': str(FRONTEND_DIR)
-        }), 404
+        return jsonify({'error': 'Frontend not found', 'path': str(FRONTEND_DIR)}), 404
 
 @app.route('/api/health', methods=['GET'])
 def health():
@@ -203,59 +154,42 @@ def health():
 def model_info():
     """Get model information"""
     if not MODEL_LOADED or not model_metadata:
-        return jsonify({
-            'error': 'Model not loaded',
-            'model_loaded': False
-        }), 500
+        return jsonify({'error': 'Model not loaded'}), 500
     
     return jsonify({
         'model_name': model_metadata.get('best_model', 'Unknown'),
         'accuracy': model_metadata.get('best_accuracy', 0),
         'f1_score': model_metadata.get('best_f1_score', 0),
-        'num_classes': 3
+        'num_classes': len(class_names_map)
     })
 
 @app.route('/api/predict', methods=['POST'])
 def predict():
-    """Predict text classification"""
+    """Predict single text"""
     start_time = time.time()
     
-    # Check if model is loaded
     if not MODEL_LOADED or model is None:
-        return jsonify({
-            'success': False,
-            'error': 'Model not loaded. Please train the model first.'
-        }), 500
+        return jsonify({'success': False, 'error': 'Model not loaded'}), 500
     
     try:
-        # Get data
         data = request.get_json()
         if not data or 'text' not in data:
-            return jsonify({
-                'success': False,
-                'error': 'No text provided'
-            }), 400
+            return jsonify({'success': False, 'error': 'No text provided'}), 400
         
         text = data['text'].strip()
         if not text:
-            return jsonify({
-                'success': False,
-                'error': 'Empty text'
-            }), 400
+            return jsonify({'success': False, 'error': 'Empty text'}), 400
         
         # Preprocess
-        cleaned_text = cleaner.clean(text)
-        if not cleaned_text:
-            cleaned_text = text  # Fallback to original
+        cleaned = cleaner.clean(text)
+        if not cleaned:
+            cleaned = text
         
         # Vectorize
-        if vectorizer:
-            features = vectorizer.transform([cleaned_text])
-        else:
-            return jsonify({
-                'success': False,
-                'error': 'Vectorizer not loaded'
-            }), 500
+        if not vectorizer:
+            return jsonify({'success': False, 'error': 'Vectorizer not loaded'}), 500
+        
+        features = vectorizer.transform([cleaned])
         
         # Predict
         prediction = model.predict(features)
@@ -263,14 +197,13 @@ def predict():
         
         # Get confidence
         confidence = 0.85
-        probabilities = [0.0, 0.0, 0.0]
+        probabilities = []
         
         if hasattr(model, 'predict_proba'):
             proba = model.predict_proba(features)
             probabilities = proba[0].tolist()
             confidence = float(max(probabilities))
         
-        # Processing time
         processing_time = int((time.time() - start_time) * 1000)
         
         return jsonify({
@@ -280,17 +213,14 @@ def predict():
             'probabilities': probabilities,
             'processing_time': processing_time,
             'original_text': text[:100],
-            'processed_text': cleaned_text[:100]
+            'processed_text': cleaned[:100]
         })
         
     except Exception as e:
         print(f"Prediction error: {e}")
         import traceback
         traceback.print_exc()
-        return jsonify({
-            'success': False,
-            'error': f'Prediction failed: {str(e)}'
-        }), 500
+        return jsonify({'success': False, 'error': str(e)}), 500
 
 @app.route('/api/predict-batch', methods=['POST'])
 def predict_batch():
@@ -298,31 +228,19 @@ def predict_batch():
     start_time = time.time()
     
     if not MODEL_LOADED or model is None:
-        return jsonify({
-            'success': False,
-            'error': 'Model not loaded'
-        }), 500
+        return jsonify({'success': False, 'error': 'Model not loaded'}), 500
     
     try:
         data = request.get_json()
         if not data or 'texts' not in data:
-            return jsonify({
-                'success': False,
-                'error': 'No texts provided'
-            }), 400
+            return jsonify({'success': False, 'error': 'No texts provided'}), 400
         
         texts = data['texts']
         if not isinstance(texts, list) or len(texts) == 0:
-            return jsonify({
-                'success': False,
-                'error': 'Invalid texts list'
-            }), 400
+            return jsonify({'success': False, 'error': 'Invalid texts'}), 400
         
         if len(texts) > 1000:
-            return jsonify({
-                'success': False,
-                'error': 'Too many texts (max 1000)'
-            }), 400
+            return jsonify({'success': False, 'error': 'Too many texts (max 1000)'}), 400
         
         results = []
         successful = 0
@@ -376,26 +294,12 @@ def predict_batch():
         print(f"Batch error: {e}")
         import traceback
         traceback.print_exc()
-        return jsonify({
-            'success': False,
-            'error': str(e)
-        }), 500
+        return jsonify({'success': False, 'error': str(e)}), 500
 
 @app.route('/api/class-names', methods=['GET'])
-def class_names():
-    """Get class name mapping"""
-    # Load from file if exists
-    class_names_path = RESULTS_DIR / 'class_names.json'
-    if class_names_path.exists():
-        with open(class_names_path, 'r', encoding='utf-8') as f:
-            return jsonify(json.load(f))
-    
-    # Default class names
-    return jsonify({
-        '0': 'فئة 0',
-        '1': 'فئة 1',
-        '2': 'فئة 2'
-    })
+def get_class_names():
+    """Get class names mapping"""
+    return jsonify(class_names_map)
 
 @app.errorhandler(404)
 def not_found(e):
@@ -413,20 +317,19 @@ if __name__ == '__main__':
     if not MODEL_LOADED:
         print("\n⚠️  WARNING: Model not loaded!")
         print("Server will start but predictions won't work.")
-        print("\nTo fix this:")
-        print("  1. Stop the server (Ctrl+C)")
-        print("  2. Run: python train_model_final.py")
-        print("  3. Wait for training to complete")
-        print("  4. Restart: python app_working.py")
+        print("\nTo fix:")
+        print("  1. python train_model_final.py")
+        print("  2. Wait for completion")
+        print("  3. Restart server")
     
-    print("\n✓ Server starting at: http://localhost:5000")
+    print("\n✓ Server at: http://localhost:5000")
     print("✓ Frontend: http://localhost:5000")
-    print("✓ Health check: http://localhost:5000/api/health")
+    print("✓ Health: http://localhost:5000/api/health")
     print("\nPress CTRL+C to stop\n")
     
     app.run(
         host='0.0.0.0',
         port=5000,
         debug=True,
-        use_reloader=False  # Disable reloader to avoid double loading
+        use_reloader=False
     )
