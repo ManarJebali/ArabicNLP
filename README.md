@@ -1,6 +1,5 @@
 # Arabic NLP Project - File Structure
-
-```
+---
 arabic_nlp_project/
 │
 ├── README.md                          # Project documentation
@@ -131,33 +130,22 @@ Un pipeline complet pour la classification de textes arabes utilisant des embedd
 ### Configuration
 
 1. **Cloner le dépôt**
-```bash
 git clone https://github.com/votreusername/arabic_nlp_project.git
 cd arabic_nlp_project
-```
+
 
 2. **Créer un environnement virtuel**
-```bash
 python -m venv venv
 source venv/bin/activate  # Sur Windows : venv\Scripts\activate
-```
 
 3. **Installer les dépendances**
-```bash
 pip install -r requirements.txt
-```
 
 4. **Télécharger les données NLTK** (pour les stopwords)
-```bash
 python -c "import nltk; nltk.download('stopwords')"
-```
 
 5. **Installer le package en mode développement** (optionnel)
-```bash
 pip install -e .
-```
-
-## ⚡ Démarrage rapide
 
 ## 📖 Utilisation
 
