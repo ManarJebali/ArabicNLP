@@ -110,18 +110,6 @@ Un pipeline complet pour la classification de textes arabes utilisant des embedd
 - 📈 **Évaluation complète** : Multiples métriques et outils de visualisation
 - ⚙️ **Configurable** : Système de configuration basé sur YAML
 
-## 📋 Table des matières
-
-- [Installation](#installation)
-- [Démarrage rapide](#démarrage-rapide)
-- [Structure du projet](#structure-du-projet)
-- [Utilisation](#utilisation)
-- [Configuration](#configuration)
-- [Exemples](#exemples)
-- [Résultats](#résultats)
-- [Contribution](#contribution)
-- [Licence](#licence)
-
 ## 🚀 Installation
 
 ### Prérequis
