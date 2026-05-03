@@ -1,5 +1,5 @@
 # Arabic NLP Project - File Structure
----
+````
 arabic_nlp_project/
 │
 ├── README.md                          # Project documentation
@@ -92,6 +92,8 @@ arabic_nlp_project/
         ├── basic_usage.py
         ├── advanced_usage.py
         └── custom_pipeline.py
+
+`````
 # 🌙 Classification de Textes Arabes avec Word Embeddings
 
 Un pipeline complet pour la classification de textes arabes utilisant des embeddings Word2Vec entraînés sur mesure et des méthodes avancées d'extraction de caractéristiques. Conçu pour les tâches de NLP arabe avec un focus sur la modularité, la reproductibilité et la performance.
