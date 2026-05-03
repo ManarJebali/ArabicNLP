@@ -125,17 +125,17 @@ cd arabic_nlp_project
 
 
 2. **Créer un environnement virtuel**
-python -m venv venv
-source venv/bin/activate  # Sur Windows : venv\Scripts\activate
+* python -m venv venv
+* source venv/bin/activate  # Sur Windows : venv\Scripts\activate
 
 3. **Installer les dépendances**
-pip install -r requirements.txt
+* pip install -r requirements.txt
 
 4. **Télécharger les données NLTK** (pour les stopwords)
-python -c "import nltk; nltk.download('stopwords')"
+* python -c "import nltk; nltk.download('stopwords')"
 
 5. **Installer le package en mode développement** (optionnel)
-pip install -e .
+* pip install -e .
 
 ## 📖 Utilisation
 
